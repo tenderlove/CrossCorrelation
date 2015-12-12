@@ -83,7 +83,7 @@ class correlationData:
             print "You didn't choose an appropriate Herschel filter."
             raise Exception(filt)
 
-        print('Reading '+fname)
+        print('Reading '+fname) 
         hdu = pyfits.open(fname)
         exten = 0 if filt == 'check' else 1
 

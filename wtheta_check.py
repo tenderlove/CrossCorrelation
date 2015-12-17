@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import ion
 
 hfilt = 'psw'
-pscale = 12.
+pscale = 30.
 
 #pickledir = '/data-2/cross/helms/pickle/nomask/pickle_nvss_' + hfilt + '/'
 pickledir = '/data-2/cross/helms/pickle/plw_plw_nomask/'
@@ -15,7 +15,6 @@ dr_pickle = glob.glob(pickledir + 'DR1*.pickle')
 rlen, dlen, drlen = len(rr_pickle), len(dd_pickle), len(dr_pickle)
 if dlen != drlen:
     print('What the fuuuuck?')
-    pdb.set_trace()
     raise Exception(rlen)
 
 goto = dlen
@@ -145,19 +144,17 @@ if len(ugh) == 0:
 
 #Nr, Nd = 1., 1.
 #corr = Nr/Nd * DD/RR - 1   # DD/DR - 1 wtf
-theta = thisp['r'] * 12./60
+theta = thisp['r'] * 30./3600
 print factor
 
 plt.ion()
 plt.figure()
 
-#plt.xscale('log'); plt.yscale('log')
+plt.xscale('log'); plt.yscale('log')
 #plt.errorbar(r, wthetas, dw,lw=3,fmt='o',color='gray')
 
 #plt.plot(theta, corr, 'o',color='gray',lw=3)
-#theta = np.log10(theta)
-#corr = np.log10(corr)
-plt.errorbar(np.log10(theta),np.log10(corr), np.log10(dcorr), color='gray',lw=3,fmt='o', label='Mine (map-catalog)')
+plt.errorbar(theta,corr, dcorr, color='gray',lw=3,fmt='o', label='Mine (map-catalog)')
 plt.xlabel(r'$\theta\ (degrees)$', fontsize=18)
 plt.ylabel(r'$w(\theta)$', fontsize=18)
 plt.xlim([.01,10]); plt.ylim([1e-4,1])
@@ -166,13 +163,13 @@ plt.xlim([.01,10]); plt.ylim([1e-4,1])
 plt.rcParams.update({'font.size': 11})
 plt.gcf().subplots_adjust(bottom=0.15)
 
-##xx=pickle.load(open("check/xx.pkl",'r'))
-##yy=pickle.load(open("check/yy.pkl",'r'))
-##er=pickle.load(open("check/er.pkl",'r'))
-##plt.errorbar(xx,yy,er,lw=3,fmt='o',color='red', label='Landy-Szalay (catalog-catalog)')
+xx=pickle.load(open("check/xx.pkl",'r'))
+yy=pickle.load(open("check/yy.pkl",'r'))
+er=pickle.load(open("check/er.pkl",'r'))
+plt.errorbar(xx,yy,er,lw=3,fmt='o',color='red', label='Landy-Szalay (catalog-catalog)')
 
-##plt.text(7, .2, '17 < $r$ < 21',ha='right', va='top',fontsize=15)
-##plt.legend(frameon=False)
+plt.text(7, .2, '17 < $r$ < 21',ha='right', va='top',fontsize=15)
+plt.legend(frameon=False)
 
 #newx, newy = np.loadtxt('/home/ketron/cross/check/sdss_digitized.txt',unpack=True)
 #plt.plot(newx, newy, 'o', color = 'blue')

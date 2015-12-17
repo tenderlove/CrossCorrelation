@@ -27,32 +27,48 @@ do_RR=False
 #data = pyfits.open('../sdss_DR12.fits')
 if not do_RR:
     ## small area: ##
-    p = pyfits.open('/home/ketron/cross/sdss_DR12.fits')
-    data = p[1].data
-    data = data[data['RA'] < 20]
-    data = data[data['dec'] > 1.3]
-    data = data[data['class'] == 'GALAXY']
-    data = data[data['r'] < 21]#m_max]
-    data = data[data['r'] > 17]
+    # p = pyfits.open('/home/ketron/cross/sdss_DR12.fits')
+    # data = p[1].data
+    # data = data[data['RA'] < 20]
+    # data = data[data['dec'] > 1.3]
+    # data = data[data['class'] == 'GALAXY']
+    # data = data[data['r'] < 21]#m_max]
+    # data = data[data['r'] > 17]
+    #
+    # ## large area ##
+    # #p=pyfits.open('/data-2/cross/helms/cats/sdss_master.fits')
+    # #data = p[1].data
+    # #data = data[data['psfMag_r'] < 21]
+    # #data = data[data['psfMag_r'] > 17]
+    #
+    # # redshift and magnitude cuts
+    # #data = data[data['redshift'] > 0.08]
+    # #data = data[data['redshift'] < 0.12]
+    #
+    # ra = data['RA']
+    # dec = data['dec']
+    # tb = (pyfits.BinTableHDU.from_columns([
+    #     pyfits.Column(name='ra',format='E',array=ra),
+    #     pyfits.Column(name='dec',format='E',array=dec)]))
+    # tb.writeto('/home/ketron/cross/check/sdss_DR12_partial_check.fits',clobber=True)
+    # print('Wrote $cross/check/sdss_DR12_partial_check.fits')
+    # pklname = "correlation_functions.pkl"
 
-    ## large area ##
-    #p=pyfits.open('/data-2/cross/helms/cats/sdss_master.fits')
-    #data = p[1].data
-    #data = data[data['psfMag_r'] < 21]
-    #data = data[data['psfMag_r'] > 17]
+    pklname = "correlation_plw.pkl"
+    #cname = '/data-2/cross/helms/herschel/helms_v0.2_PLW_SXT.fits'
+    #print 'Reading Herschel catalog:' + cname
+    #hcat = pyfits.open(cname)
+    #data = hcat[1].data
+    #data = data[data['flux'] > 30]
+    #ra, dec = data['ra'], data['dec']
+    #print('Doing herschel flux cut > 30 mJy.')
 
-    # redshift and magnitude cuts
-    #data = data[data['redshift'] > 0.08]
-    #data = data[data['redshift'] < 0.12]
-    
-    ra = data['RA']
-    dec = data['dec']
-    tb = (pyfits.BinTableHDU.from_columns([
-        pyfits.Column(name='ra',format='E',array=ra),
-        pyfits.Column(name='dec',format='E',array=dec)]))
-    tb.writeto('/home/ketron/cross/check/sdss_DR12_partial_check.fits',clobber=True)
-    print('Wrote $cross/check/sdss_DR12_partial_check.fits')
-    pklname = "correlation_functions.pkl"
+    ra  = pickle.load(open('ra_plw_crop.pickle','r'))
+    dec = pickle.load(open('dec_plw_crop.pickle','r'))
+    data = {'ra':ra, 'dec':dec}
+    data['ra'] = ra
+    data['dec'] = dec
+
 else:
     # Check that my random map/catalog is indeed random.
     p = pyfits.open('RR_check.fits')

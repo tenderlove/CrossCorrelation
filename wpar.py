@@ -6,96 +6,96 @@ import math as m
 import astropy.io.fits as pyfits
 from astropy import wcs
 from joblib import Parallel, delayed, load, dump
+import randMapDiscrete, randPosDiscrete, filterCatalog, checkXY, loadCat
 
-
-def randPosDiscrete(Nx, Ny, Ngal):
-    randx = np.random.random_integers(0, Nx-1, Ngal)
-    randy = np.random.random_integers(0, Ny-1, Ngal)
-    return (randx, randy)
-
-def randMapDiscrete(Nx, Ny, Ngal, nanmask=1.):
-    im = np.zeros((Nx,Ny))
-    randx, randy = randPosDiscrete(Nx, Ny, Ngal)
-    im[randx, randy] = 1.0
-    im *= nanmask
-    return im
+# def randPosDiscrete(Nx, Ny, Ngal):
+#     randx = np.random.random_integers(0, Nx-1, Ngal)
+#     randy = np.random.random_integers(0, Ny-1, Ngal)
+#     return (randx, randy)
+ 
+# def randMapDiscrete(Nx, Ny, Ngal, nanmask=1.):
+#     im = np.zeros((Nx,Ny))
+#     randx, randy = randPosDiscrete(Nx, Ny, Ngal)
+#     im[randx, randy] = 1.0
+#     im *= nanmask
+#     return im
 
 #def randMapDiffuse(Nx,Ny,Nal): for background=False
 
-def filterCatalog(xx, yy, Nx, Ny, nanmask=1.0):
-    '''
-    I'll be using catalogs with sources outside the Herschel area (mask),
-    so inject them into a map, apply a mask, and return
-    the sources that remain!
-    '''
-    xymap = np.zeros((Nx, Ny))
-    xymap[xx,yy] = 1.0
-    xymap *= nanmask
-    remainders = np.where(xymap == 1)
-    xcat, ycat = remainders[0], remainders[1]
-    return (xcat, ycat)
+# def filterCatalog(xx, yy, Nx, Ny, nanmask=1.0):
+#     '''
+#     I'll be using catalogs with sources outside the Herschel area (mask),
+#     so inject them into a map, apply a mask, and return
+#     the sources that remain!
+#     '''
+#     xymap = np.zeros((Nx, Ny))
+#     xymap[xx,yy] = 1.0
+#     xymap *= nanmask
+#     remainders = np.where(xymap == 1)
+#     xcat, ycat = remainders[0], remainders[1]
+#     return (xcat, ycat)
 
-def checkXY(xxx, yyy, Nx, Ny):
-    '''
-    x, y arrays should be between 0 and N?-1. This is broken when specifically
-    when I use catalogs generated from separate masks for Herschel
-    auto-correlation.
-    '''
-    butteryBiscuit = ((xxx >= 0) & (yyyy >= 0) & (xxx < Nx) & (yyy < Ny))
-    xxx = xxx[butteryBiscuit]
-    yyy = yyy[butteryBiscuit]
-    return (xxx, yyy)
+# def checkXY(xxx, yyy, Nx, Ny):
+#     '''
+#     x, y arrays should be between 0 and N?-1. This is broken when specifically
+#     when I use catalogs generated from separate masks for Herschel
+#     auto-correlation.
+#     '''
+#     butteryBiscuit = ((xxx >= 0) & (yyy >= 0) & (xxx < Nx) & (yyy < Ny))
+#     xxx = xxx[butteryBiscuit]
+#     yyy = yyy[butteryBiscuit]
+#     return (xxx, yyy)
 
-def loadCat(cname, crcats):
-    '''
-    Loads catalogs, which are presumably unique.
-    '''
-    #NVSS radio catalog
-    if cname == 'nvss':
-        print('Reading NVSS catlog:')
-        print(crcats + 'nvss_cat.fits')
-        hdu = pyfits.open(crcats+'nvss_cat.fits')
-        ra = hdu[1].data['ALPHA_J2000']
-        dec = hdu[1].data['DELTA_J2000']
+# def loadCat(cname, crcats):
+#     '''
+#     Loads catalogs, which are presumably unique.
+#     '''
+#     #NVSS radio catalog
+#     if cname == 'nvss':
+#         print('Reading NVSS catlog:')
+#         print(crcats + 'nvss_cat.fits')
+#         hdu = pyfits.open(crcats+'nvss_cat.fits')
+#         ra = hdu[1].data['ALPHA_J2000']
+#         dec = hdu[1].data['DELTA_J2000']
 
-    # SDSS optical catalog -- 4 million+ entries ==> magnitude clip!
-    elif cname == 'u' or cname == 'g' or cname == 'r' or cname == 'z':
-        print('Reading optical catalog:')
-        print(crcats + 'sdss_master.fits')
-        hdu = pyfits.open(crcats + 'sdss_master.fits')
-        data = hdu[1].data
-        if cname == 'u':
-            mag = data['psfMag_u']
-        elif cname == 'g':
-            mag = data['psfMag_g']
-        elif cname == 'r':
-            mag = data['psfMag_r']
-        elif cname == 'i':
-            mag = data['psfMag_i']
-        elif cname == 'z':
-            mag = data['psfMag_z']
-        data = data[(mag > 17) & (mag <21)]
-        ra = data['ra']
-        dec = data['dec']
-        print('Clipped sources for only 17 < ' + cname.upper()  + ' < 21')
+#     # SDSS optical catalog -- 4 million+ entries ==> magnitude clip!
+#     elif cname == 'u' or cname == 'g' or cname == 'r' or cname == 'z':
+#         print('Reading optical catalog:')
+#         print(crcats + 'sdss_master.fits')
+#         hdu = pyfits.open(crcats + 'sdss_master.fits')
+#         data = hdu[1].data
+#         if cname == 'u':
+#             mag = data['psfMag_u']
+#         elif cname == 'g':
+#             mag = data['psfMag_g']
+#         elif cname == 'r':
+#             mag = data['psfMag_r']
+#         elif cname == 'i':
+#             mag = data['psfMag_i']
+#         elif cname == 'z':
+#             mag = data['psfMag_z']
+#         data = data[(mag > 17) & (mag <21)]
+#         ra = data['ra']
+#         dec = data['dec']
+#         print('Clipped sources for only 17 < ' + cname.upper()  + ' < 21')
 
-    # Check against a cropped SDSS region and compare against astroML code.
-    # It works.
-    elif cname == 'check':
-        print('Reading check catlog:')
-        print('$cross/check/sdss_DR12_partial_check.fits')
-        hdu = pyfits.open(crcheck + 'sdss_DR12_partial_check.fits')
-        ra = hdu[1].data['ra']
-        dec = hdu[1].data['dec']
+#     # Check against a cropped SDSS region and compare against astroML code.
+#     # It works.
+#     elif cname == 'check':
+#         print('Reading check catlog:')
+#         print('$cross/check/sdss_DR12_partial_check.fits')
+#         hdu = pyfits.open(crcheck + 'sdss_DR12_partial_check.fits')
+#         ra = hdu[1].data['ra']
+#         dec = hdu[1].data['dec']
 
-    # Herschel auto-correlation if catname = filt.
-    #I set ra, dec = hra, hdec below.
-    elif cname == 'plw' or cname == 'pmw' or cname == 'psw':
-        ra, dec = 0,0
-    else:
-        raise Exception('Which catalog?')
+#     # Herschel auto-correlation if catname = filt.
+#     #I set ra, dec = hra, hdec below.
+#     elif cname == 'plw' or cname == 'pmw' or cname == 'psw':
+#         ra, dec = 0,0
+#     else:
+#         raise Exception('Which catalog?')
 
-    return (ra, dec)
+#     return (ra, dec)
 
 
 def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
@@ -191,6 +191,8 @@ def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
     nanmask = dataIm * 0.
     nanmask += 1.
     nanmask[np.where(dataIm == 0)] = 0.
+    # Remove NaNs
+    dataIm[np.where(np.isnan(dataIm))] = 0.
 
 
     # Incorporate the source mask into the nanmask?
@@ -222,7 +224,7 @@ def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
     # Get the array-positional info from RA dec
     x, y = hd.wcs_world2pix(ra, dec, 1)
     x, y = x.round().astype(int), y.round().astype(int)
-    hx, hy = hd.wcs_world2pix(ra, dec, 1)
+    hx, hy = hd.wcs_world2pix(hra, hdec, 1)
     hx, hy = hx.round().astype(int), hy.round().astype(int)
 
 
@@ -292,9 +294,46 @@ def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
             print(('You need to set wtype = RR|DD|DR1|DR2. DR is not accepted '+
                 'with background=False.'))
             raise Exception(wtype)
-    else: # Background = True
-        print('wtf do I do here?')
+
+    ##########################################
+    else:    # Background = True
+        # Just apply the source mask as default?
         pdb.set_trace()
+        if wtype == 'DD':
+            # I have one catalog and one map. Catalog should be x,y, not hx, hy.
+            im = dataIm # not times zero...
+            im *= nanmask
+            print('Injecting x1, y1 into map and using x, y = x2, y2 for wtype=DD')
+
+        elif wtype == 'DR1':
+            Ngal = round(len(x1) * Rfact)
+            im = randMapDiscrete(Nx, Ny, Ngal, nanmask=nanmask)
+            print('Replacing map with len(x1)*3 random positions with x,y=x1,y1 (wtype=DR1).')
+            x, y = x1, y1
+
+        elif wtype == 'DR2':
+            Ngal = round(len(x2) * Rfact)
+            im = randMapDiscrete(Nx, Ny, Ngal, nanmask=nanmask)
+            print('Replacing map with len(x2)*3 random positions with x,y=x2,y2(wtype=DR2).')
+            x, y = x2, y2
+
+        elif wtype == 'RR':
+            Ngal = round(len(x1) * Rfact) #x1 is largest
+            im = randMapDiscrete(Nx, Ny, Ngal, nanmask=nanmask)
+            Ngal2 = round(len(x2) * Rfact)
+            #x, y = randPosDiscrete(Nx, Ny, Ngal2) need to incorporate mask shape,
+            # so this ^ is insufficient. Just take the x, y positions from a masked
+            # random map!
+            im2 = randMapDiscrete(Nx, Ny, Ngal, nanmask=nanmask)
+            inds = np.where(im2 == 1)
+            x, y = inds[0], inds[1]
+            print(('Replacing map with len(x1)*3 random positions and catalog '+
+                'with ~ len(x2)*3 random positions.'))
+
+        else:
+            print(('You need to set wtype = RR|DD|DR1|DR2. DR is not accepted '+
+                'with background=False.'))
+            raise Exception(wtype)
 
 
 
@@ -462,7 +501,7 @@ if __name__ == '__main__':
         catname = 'check'
 
 
-    if wtype != 'DD' and wtype != 'RR' and wtype != 'DR1' and wtype != DR2:
+    if wtype != 'DD' and wtype != 'RR' and wtype != 'DR1' and wtype != 'DR2':
         print('You need to choose either "RR", "DD", "DR1" or "DR2" for wtype!')
         raise Exception(wtype)
 
@@ -517,7 +556,7 @@ if __name__ == '__main__':
     o = np.where(im == 1)
     no = float(len(o[0]))
     ncat = no / float(len(xy))
-    print 'N(rand) / N(data) = %1.4f' %ncat
+    print 'N(im) / N(cat) = %1.4f' %ncat
     p=pyfits.PrimaryHDU(im)
     p.writeto('checkim.fits',clobber=True)
     print('Writing im to checkim.fits')
@@ -526,7 +565,6 @@ if __name__ == '__main__':
     ppp=pyfits.PrimaryHDU(newnp)
     ppp.writeto('checkcat.fits', clobber=True)
     print 'wrote checkim, checkcat'
-    pdb.set_trace()
 
 
     # Binning
@@ -599,7 +637,11 @@ if __name__ == '__main__':
             try:
                 #print('Copying '+pdir+'*.pickle to my home directory.')
                 #thomedir=tempfile.mkdtemp(prefix=wtype+'_tmp',dir='/data/users/ketron/')
-                tempdir = tempfile.mkdtemp(prefix='/data/users/ketron/')
+                if not background:
+                    pfix = '/data/users/ketron/' + catname + '_' + Hfilter + '_'
+                else:
+                    pfix = '/data/users/ketron/' + catname + '_' + Hfilter + '_bkg_'
+                tempdir = tempfile.mkdtemp(prefix=pfix)
                 print('Copying ' + pdir +'/*.pickle to '+tempdir)
                 os.system('cp '+pdir + '/*.pickle ' + tempdir)#*.pickle ' + thomedir)
                 print('Removing '+pdir)

@@ -1,4 +1,0 @@
-\fixlen=T
-| ra         | dec       |
-|double      |double     |
-| deg        | deg       |

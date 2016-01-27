@@ -1,3 +1,5 @@
+import numpy as np
+
 def filterCatalog(xx, yy, Nx, Ny, nanmask=1.0):
     '''
     I'll be using catalogs with sources outside the Herschel area (mask),

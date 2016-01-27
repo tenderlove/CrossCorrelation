@@ -1,7 +1,15 @@
+import astropy.io.fits as pyfits
+import os
+
 def loadCat(cname, crcats):
+
     '''
     Loads catalogs, which are presumably unique.
     '''
+
+    cname = cname.lower()
+    cr = os.getenv('cr')
+
     #NVSS radio catalog
     if cname == 'nvss':
         print('Reading NVSS catlog:')
@@ -10,7 +18,7 @@ def loadCat(cname, crcats):
         ra = hdu[1].data['ALPHA_J2000']
         dec = hdu[1].data['DELTA_J2000']
 
-    # SDSS optical catalog -- 4 million+ entries ==> magnitude clip!
+    # SDSS optical catalog -- 4+ million entries ==> magnitude clip!
     elif cname == 'u' or cname == 'g' or cname == 'r' or cname == 'z':
         print('Reading optical catalog:')
         print(crcats + 'sdss_master.fits')
@@ -27,9 +35,20 @@ def loadCat(cname, crcats):
         elif cname == 'z':
             mag = data['psfMag_z']
         data = data[(mag > 17) & (mag <21)]
+        data = data[data['z'] > 0.08]
+        data = data[data['z'] < 0.12]
         ra = data['ra']
         dec = data['dec']
         print('Clipped sources for only 17 < ' + cname.upper()  + ' < 21')
+        print('and  0.08 > z > 0.12...')
+
+    # HELMS Herschel data.
+    elif cname == 'plw' or cname == 'pmw' or cname == 'psw':
+        print('Reading Herschel HELMS '+cname+' map.')
+        hcat = pyfits.open(cr+'herschel/helms_v0.2_'+cname.upper() + '_SXT.fits')
+        hdata = hcat[1].data
+        #hdata = hdata[hdata['flux'] > 30]
+        ra, dec = hdata['ra'], hdata['dec']
 
     # Check against a cropped SDSS region and compare against astroML code.
     # It works.

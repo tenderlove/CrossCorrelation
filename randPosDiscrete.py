@@ -1,3 +1,4 @@
+import numpy as np
 def randPosDiscrete(Nx, Ny, Ngal):
     ''' 
     Given a number of galaxies and the size of the array,

@@ -6,6 +6,7 @@ is a kind of amalgamation of the two. We wanted to measure the correlation of fo
 diffuse background light, specifically that of the cosmic far-infrared background (CFIRB). 
 
 Given a catalog of foreground sources and a sky map M containing background light, this module goes to each catalog position 
-on the map and sums all the pixel values within some annulus coresponding to angular scale. For i bins, and N catalog entries,
-this is
-$1/N \Sum_j = $
+on the map and sums all the pixel values within some annulus coresponding to angular scale. For catalog entry j = 0,1...N, the cross-correlation at bin i is
+<br>
+<img src="https://github.com/ketronmw/CrossCorrelation/edit/master/math.png"/>
+</br>

@@ -8,94 +8,116 @@ from astropy import wcs
 from joblib import Parallel, delayed, load, dump
 import randMapDiscrete, randPosDiscrete, filterCatalog, checkXY, loadCat
 
-# def randPosDiscrete(Nx, Ny, Ngal):
-#     randx = np.random.random_integers(0, Nx-1, Ngal)
-#     randy = np.random.random_integers(0, Ny-1, Ngal)
-#     return (randx, randy)
+
+def randPosDiscrete(Nx, Ny, Ngal):
+    ''' 
+    Return Ngal random integer points in 2D array 
+    of size [Nx, Ny].
+    '''
+
+    randx = np.random.random_integers(0, Nx-1, Ngal)
+    randy = np.random.random_integers(0, Ny-1, Ngal)
+    return (randx, randy)
  
-# def randMapDiscrete(Nx, Ny, Ngal, nanmask=1.):
-#     im = np.zeros((Nx,Ny))
-#     randx, randy = randPosDiscrete(Nx, Ny, Ngal)
-#     im[randx, randy] = 1.0
-#     im *= nanmask
-#     return im
 
-#def randMapDiffuse(Nx,Ny,Nal): for background=False
+def randMapDiscrete(Nx, Ny, Ngal, nanmask=1.):
+    '''
+    Apply the ROI and source mask (if any) to the random
+    map output from randPosDiscrete.
+    '''
 
-# def filterCatalog(xx, yy, Nx, Ny, nanmask=1.0):
-#     '''
-#     I'll be using catalogs with sources outside the Herschel area (mask),
-#     so inject them into a map, apply a mask, and return
-#     the sources that remain!
-#     '''
-#     xymap = np.zeros((Nx, Ny))
-#     xymap[xx,yy] = 1.0
-#     xymap *= nanmask
-#     remainders = np.where(xymap == 1)
-#     xcat, ycat = remainders[0], remainders[1]
-#     return (xcat, ycat)
+    im = np.zeros((Nx,Ny))
+    randx, randy = randPosDiscrete(Nx, Ny, Ngal)
+    im[randx, randy] = 1.0
+    im *= nanmask
+    return im
 
-# def checkXY(xxx, yyy, Nx, Ny):
-#     '''
-#     x, y arrays should be between 0 and N?-1. This is broken when specifically
-#     when I use catalogs generated from separate masks for Herschel
-#     auto-correlation.
-#     '''
-#     butteryBiscuit = ((xxx >= 0) & (yyy >= 0) & (xxx < Nx) & (yyy < Ny))
-#     xxx = xxx[butteryBiscuit]
-#     yyy = yyy[butteryBiscuit]
-#     return (xxx, yyy)
 
-# def loadCat(cname, crcats):
-#     '''
-#     Loads catalogs, which are presumably unique.
-#     '''
-#     #NVSS radio catalog
-#     if cname == 'nvss':
-#         print('Reading NVSS catlog:')
-#         print(crcats + 'nvss_cat.fits')
-#         hdu = pyfits.open(crcats+'nvss_cat.fits')
-#         ra = hdu[1].data['ALPHA_J2000']
-#         dec = hdu[1].data['DELTA_J2000']
+#def randMapDiffuse(Nx,Ny,Nal): for background=False. Not there yet.
 
-#     # SDSS optical catalog -- 4 million+ entries ==> magnitude clip!
-#     elif cname == 'u' or cname == 'g' or cname == 'r' or cname == 'z':
-#         print('Reading optical catalog:')
-#         print(crcats + 'sdss_master.fits')
-#         hdu = pyfits.open(crcats + 'sdss_master.fits')
-#         data = hdu[1].data
-#         if cname == 'u':
-#             mag = data['psfMag_u']
-#         elif cname == 'g':
-#             mag = data['psfMag_g']
-#         elif cname == 'r':
-#             mag = data['psfMag_r']
-#         elif cname == 'i':
-#             mag = data['psfMag_i']
-#         elif cname == 'z':
-#             mag = data['psfMag_z']
-#         data = data[(mag > 17) & (mag <21)]
-#         ra = data['ra']
-#         dec = data['dec']
-#         print('Clipped sources for only 17 < ' + cname.upper()  + ' < 21')
 
-#     # Check against a cropped SDSS region and compare against astroML code.
-#     # It works.
-#     elif cname == 'check':
-#         print('Reading check catlog:')
-#         print('$cross/check/sdss_DR12_partial_check.fits')
-#         hdu = pyfits.open(crcheck + 'sdss_DR12_partial_check.fits')
-#         ra = hdu[1].data['ra']
-#         dec = hdu[1].data['dec']
+def filterCatalog(xx, yy, Nx, Ny, nanmask=1.0):
 
-#     # Herschel auto-correlation if catname = filt.
-#     #I set ra, dec = hra, hdec below.
-#     elif cname == 'plw' or cname == 'pmw' or cname == 'psw':
-#         ra, dec = 0,0
-#     else:
-#         raise Exception('Which catalog?')
+    '''
+    I'll be using catalogs with sources outside the Herschel area (mask),
+    so inject them into a map, apply a mask, and return
+    the sources that remain!
+    '''
 
-#     return (ra, dec)
+    xymap = np.zeros((Nx, Ny))
+    xymap[xx,yy] = 1.0
+    xymap *= nanmask
+    remainders = np.where(xymap == 1)
+    xcat, ycat = remainders[0], remainders[1]
+    return (xcat, ycat)
+
+def checkXY(xxx, yyy, Nx, Ny):
+
+    '''
+    x, y arrays should be between 0 and N?-1. This is broken when specifically
+    when I use catalogs generated from separate masks for Herschel
+    auto-correlation.
+    '''
+
+    ptsInside = ((xxx >= 0) & (yyy >= 0) & (xxx < Nx) & (yyy < Ny))
+    xxx = xxx[ptsInside]
+    yyy = yyy[ptsInside]
+    return (xxx, yyy)
+
+
+def loadCat(cname, crcats):
+
+    '''
+    Loads catalogs, which are presumably unique.
+    This is not general and applies to only my catalogs.
+    '''
+
+    #NVSS radio catalog
+    if cname == 'nvss':
+        print('Reading NVSS catlog:')
+        print(crcats + 'nvss_cat.fits')
+        hdu = pyfits.open(crcats+'nvss_cat.fits')
+        ra = hdu[1].data['ALPHA_J2000']
+        dec = hdu[1].data['DELTA_J2000']
+
+    # SDSS optical catalog -- 4 million+ entries ==> magnitude clip!
+    elif cname == 'u' or cname == 'g' or cname == 'r' or cname == 'z':
+        print('Reading optical catalog:')
+        print(crcats + 'sdss_master.fits')
+        hdu = pyfits.open(crcats + 'sdss_master.fits')
+        data = hdu[1].data
+        if cname == 'u':
+            mag = data['psfMag_u']
+        elif cname == 'g':
+            mag = data['psfMag_g']
+        elif cname == 'r':
+            mag = data['psfMag_r']
+        elif cname == 'i':
+            mag = data['psfMag_i']
+        elif cname == 'z':
+            mag = data['psfMag_z']
+        data = data[(mag > 17) & (mag <21)]
+        ra = data['ra']
+        dec = data['dec']
+        print('Clipped sources for only 17 < ' + cname.upper()  + ' < 21')
+
+    # Check against a cropped SDSS region and compare against astroML code.
+    # It works.
+    elif cname == 'check':
+        print('Reading check catlog:')
+        print('$cross/check/sdss_DR12_partial_check.fits')
+        hdu = pyfits.open(crcheck + 'sdss_DR12_partial_check.fits')
+        ra = hdu[1].data['ra']
+        dec = hdu[1].data['dec']
+
+    # Herschel auto-correlation if catname = filt.
+    #I set ra, dec = hra, hdec below.
+    elif cname == 'plw' or cname == 'pmw' or cname == 'psw':
+        ra, dec = 0,0
+    else:
+        raise Exception('Which catalog?')
+
+    return (ra, dec)
 
 
 def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
@@ -222,22 +244,12 @@ def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
 
 
     # Get the array-positional info from RA dec
-    x, y = hd.wcs_world2pix(ra, dec, 1)
-    x, y = x.round().astype(int), y.round().astype(int)
-    hx, hy = hd.wcs_world2pix(hra, hdec, 1)
+    y,x = hd.wcs_world2pix(ra, dec, 1)
+    x,y = x.round().astype(int), y.round().astype(int)
+    hy, hx = hd.wcs_world2pix(hra, hdec, 1)
     hx, hy = hx.round().astype(int), hy.round().astype(int)
 
-
-    # Why does wcs swap x and y? I have some strange header maybe.
-    # Also if I'm running on my rotated cropped image the catalog will be
-    # slightly larger that if should so those sources need to be
-    # removed via checkXY().
-    if max(x) > Nx or max(y1) > Ny:
-        print('x and y are swapped from wcs_world2pix for some reason. '+
-                    "I'm swapping them.")
-        x, y = y, x
-        hx, hy = hy, hx
-
+    # In bounds?
     x, y   = checkXY(x,   y, Nx, Ny)
     hx, hy = checkXY(hx, hy, Nx, Ny)
 
@@ -570,13 +582,6 @@ if __name__ == '__main__':
     # Binning
     minb = 2 #if checkrun else 10
     maxb = 2.4*max(im.shape) #m.floor(m.sqrt(dim1**2 + dim2**2))
-    #xx, yy = xy[:,0], xy[:,1]
-    #us = xx if max(xx) > max(yy) else yy
-    #maxb = (max(us) - min(us)) * 2.
-    #deg_out = maxb * data.pscale / 3600
-    # 5 bins per decade is good XX 20 bins between 1e-2 and 10 is good.
-    #data.nbins = 20 / 1000 * deg_out
-    #pdb.set_trace()
     radial = 10 ** np.linspace(np.log10(minb), np.log10(maxb), data.nbins+2)
     nrad = len(radial)
     rbins_edges = np.zeros((nrad-2)*2); rbins = np.zeros(nrad-2); j=0

@@ -8,7 +8,5 @@ diffuse background light, specifically that of the cosmic far-infrared backgroun
 Given a catalog of foreground sources and a sky map M containing background light, this module goes to each catalog position 
 on the map and sums all the pixel values within some annulus coresponding to angular scale. For catalog entry j = 0,1...N, the cross-correlation at annular bin i is
 
-![Alt text](math.png "Title")
-<br>
-<img src="https://github.com/ketronmw/CrossCorrelation/edit/master/math.png"/>
-</br>
+![Alt text](math.png)
+

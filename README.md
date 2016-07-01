@@ -7,4 +7,4 @@ Given a catalog of foreground sources and a sky map M containing background ligh
 
 This is slow. I run it on a cluster by calling as in plw_DD.sh for the DD (data-data) run. Once output files for DD, RR, DR and RD are written, wtheta.py actually computes w(theta) from those files with the Landy-Szalay estimator. 
 
-I would have spent time optimizing this, but after I had written this much my advisor changed his mind about what projects he wanted me working on.
+I would have spent time optimizing this, but after I had written this much, my advisor changed his mind about what projects he wanted me working on.

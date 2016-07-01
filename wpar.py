@@ -154,7 +154,7 @@ def getCorrelationData(filt, catname, wtype, nbins, nomask, background):
     filt = filt.lower()
 
     hostname = socket.gethostname()
-    if hostname != 'elgordo':
+    if hostname != 'thegord':
         cr = '/data/users/ketron/'
         crcats = cr
         crmaps = cr
@@ -520,7 +520,7 @@ if __name__ == '__main__':
 
     # First of all, if I'm runnin on the cluster everything should be saved to /scratch. dumb. this is.
     hostname = socket.gethostname()
-    if hostname != 'elgordo':
+    if hostname != 'thegord':
         scratch = os.path.exists('/scratch/ketron/')
         if not scratch:
             os.mkdir('/scratch/ketron/')
@@ -599,7 +599,7 @@ if __name__ == '__main__':
 
 
     # Naming again.
-    if hostname != 'elgordo':
+    if hostname != 'thegord':
         folder = tempfile.mkdtemp(prefix=cr)
     else:
         folder = tempfile.mkdtemp()
@@ -638,7 +638,7 @@ if __name__ == '__main__':
         except:
             print('Failed to delete: ' + folder)
 
-        if hostname != 'elgordo':
+        if hostname != 'thegord':
             try:
                 #print('Copying '+pdir+'*.pickle to my home directory.')
                 #thomedir=tempfile.mkdtemp(prefix=wtype+'_tmp',dir='/data/users/ketron/')

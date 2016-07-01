@@ -10,4 +10,4 @@ on the map and sums all the pixel values within some annulus coresponding to ang
 
 ![Alt text](math.png)
 
-This is slow. I run it on a cluster by calling as in plw_DD.sh for the DD (data-data) run. Once output files for DD, RR, DR and RD are written, wtheta.py actually computes w(theta) from those files with the Landy-Szalay estimator.
+This is slow. I run it on a cluster by calling as in plw_DD.sh for the DD (data-data) run. Once output files for DD, RR, DR and RD are written, wtheta.py actually computes w(theta) from those files with the Landy-Szalay estimator. I would have spent time optimizing this, but after I had written this much my advisor changed his mind about what projects he wanted me working on.
